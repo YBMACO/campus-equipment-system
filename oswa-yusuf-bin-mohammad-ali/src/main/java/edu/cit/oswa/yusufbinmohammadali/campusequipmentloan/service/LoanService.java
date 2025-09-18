@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class LoanService {
@@ -20,18 +19,29 @@ public class LoanService {
 
     public LoanService(LoanRepository loanRepository,
                        EquipmentRepository equipmentRepository,
-                       StudentRepository studentRepository) {
+                       StudentRepository studentRepository,
+                       PenaltyStrategy penaltyStrategy) {
         this.loanRepository = loanRepository;
         this.equipmentRepository = equipmentRepository;
         this.studentRepository = studentRepository;
-        this.penaltyStrategy = (PenaltyStrategy) new DailyPenaltyStrategy(); // strategy injected here
+        this.penaltyStrategy = penaltyStrategy;
+    }
+
+    public List<Loan> getAllLoans() {
+        return loanRepository.findAll();
+    }
+
+    public List<Loan> getLoansByStudent(Long studentId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+        return loanRepository.findByStudentAndStatus(student, LoanStatus.ACTIVE);
     }
 
     @Transactional
-    public Loan createLoan(Long studentId, Long equipmentId) throws Throwable {
-        Student student = (Student) studentRepository.findById(studentId)
+    public Loan createLoan(Long studentId, Long equipmentId) {
+        Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
-        Equipment equipment = (Equipment) equipmentRepository.findById(equipmentId)
+        Equipment equipment = equipmentRepository.findById(equipmentId)
                 .orElseThrow(() -> new IllegalArgumentException("Equipment not found"));
 
         if (!equipment.getAvailability()) {
@@ -57,7 +67,7 @@ public class LoanService {
     }
 
     @Transactional
-    public long returnLoan(Long loanId) {
+    public Loan returnLoanWithPenalty(Long loanId) {
         Loan loan = loanRepository.findById(loanId)
                 .orElseThrow(() -> new IllegalArgumentException("Loan not found"));
 
@@ -76,15 +86,14 @@ public class LoanService {
             loan.setStatus(LoanStatus.RETURNED);
         }
 
-        // Mark equipment available
+        long penalty = penaltyStrategy.calculatePenalty(daysLate);
+        loan.setPenalty(penalty);
+
         Equipment equipment = loan.getEquipment();
         equipment.setAvailability(true);
         equipmentRepository.save(equipment);
 
-        loanRepository.save(loan);
-
-        // Calculate penalty if any
-        return penaltyStrategy.calculatePenalty(daysLate);
+        return loanRepository.save(loan);
     }
 
     public List<Equipment> getAvailableEquipment() {

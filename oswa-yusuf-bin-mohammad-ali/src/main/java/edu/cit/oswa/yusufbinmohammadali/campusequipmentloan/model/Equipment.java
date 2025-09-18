@@ -24,10 +24,8 @@ public class Equipment {
     @NotNull
     private Boolean availability = true;
 
-    // Default constructor
     public Equipment() {}
 
-    // Parameterized constructor
     public Equipment(String name, String type, String serialNumber, Boolean availability) {
         this.name = name;
         this.type = type;
@@ -35,7 +33,6 @@ public class Equipment {
         this.availability = availability;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

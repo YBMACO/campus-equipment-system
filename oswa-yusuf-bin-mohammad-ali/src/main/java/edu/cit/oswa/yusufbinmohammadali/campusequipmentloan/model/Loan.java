@@ -32,10 +32,8 @@ public class Loan {
     @NotNull
     private LoanStatus status;
 
-    // Default constructor
     public Loan() {}
 
-    // Parameterized constructor
     public Loan(Equipment equipment, Student student, LocalDate startDate, LocalDate dueDate, LoanStatus status) {
         this.equipment = equipment;
         this.student = student;
@@ -44,7 +42,6 @@ public class Loan {
         this.status = status;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -100,4 +97,11 @@ public class Loan {
     public void setStatus(LoanStatus status) {
         this.status = status;
     }
+
+    @NotNull
+    private long penalty = 0;
+
+    public long getPenalty() { return penalty; }
+    public void setPenalty(long penalty) { this.penalty = penalty; }
+
 }
