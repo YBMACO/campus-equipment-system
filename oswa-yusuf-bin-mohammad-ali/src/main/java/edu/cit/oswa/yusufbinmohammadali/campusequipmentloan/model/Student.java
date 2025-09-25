@@ -22,46 +22,20 @@ public class Student {
     @NotBlank
     private String email;
 
-    // Default constructor
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     public Student() {}
 
-    // Parameterized constructor
-    public Student(String studentNo, String name, String email) {
+    public Student(String studentNo, String name, String email, User user) {
         this.studentNo = studentNo;
         this.name = name;
         this.email = email;
+        this.user = user;
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getStudentNo() {
-        return studentNo;
-    }
-
-    public void setStudentNo(String studentNo) {
-        this.studentNo = studentNo;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    // Getters and setters...
 }
+
+
